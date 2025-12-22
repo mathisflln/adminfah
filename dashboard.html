@@ -134,7 +134,7 @@
   <aside class="sidebar">
     <div class="sidebar-header">
       <a href="https://fahmariecurie.vercel.app" class="sidebar-logo">
-        <img src="assets/logos/fah.png" alt="FAH Marie-Curie" />
+        <img src="https://fahmariecurie.vercel.app/assets/logos/fah.png" alt="FAH Marie-Curie" />
       </a>
       <span class="admin-badge">ADMIN</span>
     </div>
@@ -397,10 +397,6 @@
         <div class="form-group">
           <label class="form-label">Description</label>
           <textarea class="form-textarea" style="min-height: 100px;" id="quiz-description"></textarea>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Couleur</label>
-          <input type="color" class="form-input" id="quiz-color" value="#c084fc">
         </div>
         
         <div class="form-group">
@@ -877,7 +873,6 @@
       
       const title = document.getElementById('quiz-title').value;
       const description = document.getElementById('quiz-description').value;
-      const color = document.getElementById('quiz-color').value;
 
       if (quizQuestions.length === 0) {
         alert('Veuillez ajouter au moins une question');
@@ -899,7 +894,6 @@
       const quizData = {
         title,
         description: description || null,
-        color,
         questions: quizQuestions
       };
 
@@ -929,7 +923,6 @@
         document.getElementById('quiz-modal-title').textContent = 'Modifier le quiz';
         document.getElementById('quiz-title').value = data.title;
         document.getElementById('quiz-description').value = data.description || '';
-        document.getElementById('quiz-color').value = data.color || '#c084fc';
         
         quizQuestions = typeof data.questions === 'string' ? JSON.parse(data.questions) : data.questions;
         renderQuizBuilder();
