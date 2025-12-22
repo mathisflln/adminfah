@@ -75,7 +75,8 @@
     /* MODAL */
     .modal { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.8); z-index: 1000; align-items: center; justify-content: center; }
     .modal.active { display: flex; }
-    .modal-content { background: #141414; border-radius: 16px; padding: 32px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto; border: 1px solid #2a2a2a; }
+    .modal-content { background: #141414; border-radius: 16px; padding: 32px; max-width: 900px; width: 90%; max-height: 85vh; overflow-y: auto; border: 1px solid #2a2a2a; }
+    .modal-content.wide { max-width: 1100px; }
     .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; }
     .modal-title { font-size: 1.5rem; font-weight: 600; color: #e5e5e5; }
     .btn-close-modal { background: none; border: none; cursor: pointer; color: #999; padding: 4px; }
@@ -84,7 +85,28 @@
     .form-label { display: block; font-size: 0.9rem; color: #999; margin-bottom: 8px; font-weight: 500; }
     .form-input, .form-textarea, .form-select { width: 100%; padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; color: #e5e5e5; font-family: "Stack Sans Headline", sans-serif; font-size: 0.9rem; }
     .form-input:focus, .form-textarea:focus, .form-select:focus { outline: none; border-color: #FFFF10; }
-    .form-textarea { min-height: 120px; resize: vertical; }
+    .form-textarea { min-height: 300px; resize: vertical; font-family: 'Courier New', monospace; line-height: 1.6; }
+    
+    /* ÉDITEUR RICHE */
+    .rich-editor { background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; overflow: hidden; }
+    .editor-toolbar { display: flex; gap: 4px; padding: 8px; background: #1a1a1a; border-bottom: 1px solid #2a2a2a; flex-wrap: wrap; }
+    .editor-btn { padding: 6px 10px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 4px; color: #999; cursor: pointer; font-size: 0.85rem; transition: all 0.2s; }
+    .editor-btn:hover { border-color: #FFFF10; color: #FFFF10; }
+    .editor-content { min-height: 400px; padding: 16px; color: #e5e5e5; font-size: 0.95rem; line-height: 1.8; outline: none; }
+    .editor-content:empty:before { content: 'Commencez à écrire votre article...'; color: #666; }
+    
+    /* QUIZ BUILDER */
+    .quiz-builder { display: flex; flex-direction: column; gap: 16px; }
+    .question-block { background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; }
+    .question-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .question-number { font-weight: 600; color: #FFFF10; }
+    .btn-remove-question { padding: 4px 8px; background: transparent; border: 1px solid #4a0000; color: #ff4444; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
+    .btn-remove-question:hover { background: #1a0000; }
+    .answer-option { display: flex; gap: 8px; align-items: center; margin-top: 8px; }
+    .answer-option input[type="radio"] { width: 18px; height: 18px; cursor: pointer; }
+    .answer-option input[type="text"] { flex: 1; }
+    .btn-add-question { width: 100%; padding: 12px; background: #1a1a1a; border: 1px dashed #2a2a2a; border-radius: 8px; color: #999; cursor: pointer; transition: all 0.2s; }
+    .btn-add-question:hover { border-color: #FFFF10; color: #FFFF10; }
     .form-file { padding: 12px; background: #0a0a0a; border: 1px solid #2a2a2a; border-radius: 8px; cursor: pointer; }
     .modal-actions { display: flex; gap: 12px; margin-top: 24px; }
     .btn-modal { flex: 1; padding: 14px 24px; border-radius: 8px; font-family: inherit; font-size: 0.95rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
@@ -301,7 +323,7 @@
 
   <!-- MODAL ARTICLE -->
   <div id="article-modal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content wide">
       <div class="modal-header">
         <h2 class="modal-title" id="article-modal-title">Nouvel article</h2>
         <button class="btn-close-modal" id="btn-close-article">
@@ -317,10 +339,24 @@
           <label class="form-label">Titre *</label>
           <input type="text" class="form-input" id="article-title" required>
         </div>
+        
         <div class="form-group">
           <label class="form-label">Contenu *</label>
-          <textarea class="form-textarea" id="article-content" required></textarea>
+          <div class="rich-editor">
+            <div class="editor-toolbar">
+              <button type="button" class="editor-btn" data-command="bold"><strong>Gras</strong></button>
+              <button type="button" class="editor-btn" data-command="italic"><em>Italique</em></button>
+              <button type="button" class="editor-btn" data-command="underline"><u>Souligné</u></button>
+              <button type="button" class="editor-btn" data-command="insertUnorderedList">• Liste</button>
+              <button type="button" class="editor-btn" data-command="insertOrderedList">1. Numérotée</button>
+              <button type="button" class="editor-btn" data-command="formatBlock" data-value="h2">Titre 2</button>
+              <button type="button" class="editor-btn" data-command="formatBlock" data-value="h3">Titre 3</button>
+              <button type="button" class="editor-btn" data-command="createLink">🔗 Lien</button>
+            </div>
+            <div class="editor-content" id="article-content" contenteditable="true"></div>
+          </div>
         </div>
+        
         <div class="form-group">
           <label class="form-label">Image de couverture (URL)</label>
           <input type="text" class="form-input" id="article-cover">
@@ -342,7 +378,7 @@
 
   <!-- MODAL QUIZ -->
   <div id="quiz-modal" class="modal">
-    <div class="modal-content">
+    <div class="modal-content wide">
       <div class="modal-header">
         <h2 class="modal-title" id="quiz-modal-title">Nouveau quiz</h2>
         <button class="btn-close-modal" id="btn-close-quiz">
@@ -360,16 +396,21 @@
         </div>
         <div class="form-group">
           <label class="form-label">Description</label>
-          <textarea class="form-textarea" id="quiz-description"></textarea>
+          <textarea class="form-textarea" style="min-height: 100px;" id="quiz-description"></textarea>
         </div>
         <div class="form-group">
           <label class="form-label">Couleur</label>
           <input type="color" class="form-input" id="quiz-color" value="#c084fc">
         </div>
+        
         <div class="form-group">
-          <label class="form-label">Questions (JSON) *</label>
-          <textarea class="form-textarea" id="quiz-questions" placeholder='[{"question":"Q1","answers":["A","B","C","D"],"correct":0}]' required></textarea>
+          <label class="form-label">Questions</label>
+          <div class="quiz-builder" id="quiz-builder"></div>
+          <button type="button" class="btn-add-question" id="btn-add-quiz-question">
+            + Ajouter une question
+          </button>
         </div>
+        
         <div class="modal-actions">
           <button type="button" class="btn-modal btn-secondary" id="btn-cancel-quiz">Annuler</button>
           <button type="submit" class="btn-modal btn-primary">Enregistrer</button>
@@ -556,6 +597,27 @@
     }
 
     // === ARTICLES ===
+    
+    // Éditeur riche pour articles
+    document.querySelectorAll('.editor-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const command = btn.dataset.command;
+        const value = btn.dataset.value;
+        
+        if (command === 'createLink') {
+          const url = prompt('URL du lien:');
+          if (url) document.execCommand('createLink', false, url);
+        } else if (value) {
+          document.execCommand(command, false, value);
+        } else {
+          document.execCommand(command, false, null);
+        }
+        
+        document.getElementById('article-content').focus();
+      });
+    });
+    
     async function loadArticles() {
       const { data: articles } = await supabaseClient
         .from('articles')
@@ -619,7 +681,8 @@
       e.preventDefault();
       
       const title = document.getElementById('article-title').value;
-      const content = document.getElementById('article-content').value;
+      const contentDiv = document.getElementById('article-content');
+      const content = contentDiv.innerHTML;
       const coverImage = document.getElementById('article-cover').value;
       const published = document.getElementById('article-published').value === 'true';
       const slug = title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
@@ -651,7 +714,7 @@
       if (data) {
         document.getElementById('article-modal-title').textContent = 'Modifier l\'article';
         document.getElementById('article-title').value = data.title;
-        document.getElementById('article-content').value = data.content;
+        document.getElementById('article-content').innerHTML = data.content;
         document.getElementById('article-cover').value = data.cover_image || '';
         document.getElementById('article-published').value = data.published.toString();
         document.getElementById('article-modal').classList.add('active');
@@ -667,6 +730,79 @@
     }
 
     // === QUIZ ===
+    
+    let quizQuestions = [];
+    
+    function renderQuizBuilder() {
+      const container = document.getElementById('quiz-builder');
+      container.innerHTML = '';
+      
+      quizQuestions.forEach((q, index) => {
+        const block = document.createElement('div');
+        block.className = 'question-block';
+        block.innerHTML = `
+          <div class="question-header">
+            <span class="question-number">Question ${index + 1}</span>
+            <button type="button" class="btn-remove-question" data-index="${index}">Supprimer</button>
+          </div>
+          <div class="form-group">
+            <input type="text" class="form-input" placeholder="Texte de la question" value="${escapeHtml(q.question)}" data-index="${index}" data-field="question">
+          </div>
+          <div class="form-group">
+            <label class="form-label" style="margin-bottom: 8px;">Réponses (cochez la bonne réponse)</label>
+            ${q.answers.map((ans, i) => `
+              <div class="answer-option">
+                <input type="radio" name="correct-${index}" value="${i}" ${q.correct === i ? 'checked' : ''} data-index="${index}" data-answer="${i}">
+                <input type="text" class="form-input" placeholder="Réponse ${i + 1}" value="${escapeHtml(ans)}" data-index="${index}" data-field="answer" data-answer="${i}">
+              </div>
+            `).join('')}
+          </div>
+        `;
+        container.appendChild(block);
+      });
+      
+      // Event listeners
+      container.querySelectorAll('input[data-field="question"]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          quizQuestions[idx].question = e.target.value;
+        });
+      });
+      
+      container.querySelectorAll('input[data-field="answer"]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          const ansIdx = parseInt(e.target.dataset.answer);
+          quizQuestions[idx].answers[ansIdx] = e.target.value;
+        });
+      });
+      
+      container.querySelectorAll('input[type="radio"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          const ansIdx = parseInt(e.target.dataset.answer);
+          quizQuestions[idx].correct = ansIdx;
+        });
+      });
+      
+      container.querySelectorAll('.btn-remove-question').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const idx = parseInt(btn.dataset.index);
+          quizQuestions.splice(idx, 1);
+          renderQuizBuilder();
+        });
+      });
+    }
+    
+    document.getElementById('btn-add-quiz-question').addEventListener('click', () => {
+      quizQuestions.push({
+        question: '',
+        answers: ['', '', '', ''],
+        correct: 0
+      });
+      renderQuizBuilder();
+    });
+    
     async function loadQuizzes() {
       const { data: quizzes } = await supabaseClient
         .from('quizzes')
@@ -721,8 +857,10 @@
 
     document.getElementById('btn-new-quiz').addEventListener('click', () => {
       editingQuizId = null;
+      quizQuestions = [];
       document.getElementById('quiz-modal-title').textContent = 'Nouveau quiz';
       document.getElementById('quiz-form').reset();
+      renderQuizBuilder();
       document.getElementById('quiz-modal').classList.add('active');
     });
 
@@ -740,13 +878,9 @@
       const title = document.getElementById('quiz-title').value;
       const description = document.getElementById('quiz-description').value;
       const color = document.getElementById('quiz-color').value;
-      const questionsStr = document.getElementById('quiz-questions').value;
 
-      let questions;
-      try {
-        questions = JSON.parse(questionsStr);
-      } catch (err) {
-        alert('Format JSON invalide pour les questions');
+      if (quizQuestions.length === 0) {
+        alert('Veuillez ajouter au moins une question');
         return;
       }
 
@@ -754,7 +888,7 @@
         title,
         description: description || null,
         color,
-        questions
+        questions: quizQuestions
       };
 
       if (editingQuizId) {
@@ -777,7 +911,10 @@
         document.getElementById('quiz-title').value = data.title;
         document.getElementById('quiz-description').value = data.description || '';
         document.getElementById('quiz-color').value = data.color || '#c084fc';
-        document.getElementById('quiz-questions').value = JSON.stringify(data.questions, null, 2);
+        
+        quizQuestions = typeof data.questions === 'string' ? JSON.parse(data.questions) : data.questions;
+        renderQuizBuilder();
+        
         document.getElementById('quiz-modal').classList.add('active');
       }
     }
