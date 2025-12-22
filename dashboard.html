@@ -884,6 +884,18 @@
         return;
       }
 
+      // Vérifier que les questions sont bien remplies
+      for (let i = 0; i < quizQuestions.length; i++) {
+        if (!quizQuestions[i].question.trim()) {
+          alert(`La question ${i + 1} est vide`);
+          return;
+        }
+        if (quizQuestions[i].answers.some(a => !a.trim())) {
+          alert(`Toutes les réponses de la question ${i + 1} doivent être remplies`);
+          return;
+        }
+      }
+
       const quizData = {
         title,
         description: description || null,
@@ -891,15 +903,22 @@
         questions: quizQuestions
       };
 
-      if (editingQuizId) {
-        await supabaseClient.from('quizzes').update(quizData).eq('id', editingQuizId);
-      } else {
-        await supabaseClient.from('quizzes').insert([quizData]);
-      }
+      try {
+        if (editingQuizId) {
+          const { error } = await supabaseClient.from('quizzes').update(quizData).eq('id', editingQuizId);
+          if (error) throw error;
+        } else {
+          const { error } = await supabaseClient.from('quizzes').insert([quizData]);
+          if (error) throw error;
+        }
 
-      document.getElementById('quiz-modal').classList.remove('active');
-      loadQuizzes();
-      loadStats();
+        document.getElementById('quiz-modal').classList.remove('active');
+        loadQuizzes();
+        loadStats();
+      } catch (error) {
+        console.error('Erreur quiz:', error);
+        alert('Erreur lors de l\'enregistrement : ' + error.message);
+      }
     });
 
     async function editQuiz(id) {
@@ -997,35 +1016,70 @@
         return;
       }
 
-      // Upload vers Supabase Storage
-      const filename = `${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabaseClient.storage
-        .from('documents')
-        .upload(filename, file);
+      try {
+        // Upload vers Supabase Storage
+        const filename = `${Date.now()}_${file.name}`;
+        const { data: uploadData, error: uploadError } = await supabaseClient.storage
+          .from('documents')
+          .upload(filename, file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-      if (uploadError) {
-        alert('Erreur lors de l\'upload : ' + uploadError.message);
-        return;
+        if (uploadError) {
+          console.error('Upload error:', uploadError);
+          alert('Erreur lors de l\'upload : ' + uploadError.message + '\n\nVérifiez que vous avez les permissions d\'upload sur le bucket "documents"');
+          return;
+        }
+
+        // Créer l'entrée dans documents_meta
+        const { error: insertError } = await supabaseClient.from('documents_meta').insert([{
+          title,
+          filename,
+          description: description || null
+        }]);
+
+        if (insertError) {
+          console.error('Insert error:', insertError);
+          // Si l'insertion échoue, supprimer le fichier uploadé
+          await supabaseClient.storage.from('documents').remove([filename]);
+          alert('Erreur lors de la création des métadonnées : ' + insertError.message);
+          return;
+        }
+
+        document.getElementById('document-modal').classList.remove('active');
+        loadDocuments();
+        loadStats();
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Erreur : ' + error.message);
       }
-
-      // Créer l'entrée dans documents_meta
-      await supabaseClient.from('documents_meta').insert([{
-        title,
-        filename,
-        description: description || null
-      }]);
-
-      document.getElementById('document-modal').classList.remove('active');
-      loadDocuments();
-      loadStats();
     });
 
     async function deleteDocument(id, filename) {
       if (confirm('Êtes-vous sûr de vouloir supprimer ce document ?')) {
-        await supabaseClient.storage.from('documents').remove([filename]);
-        await supabaseClient.from('documents_meta').delete().eq('id', id);
-        loadDocuments();
-        loadStats();
+        try {
+          // Supprimer de la base de données
+          const { error: dbError } = await supabaseClient.from('documents_meta').delete().eq('id', id);
+          if (dbError) {
+            console.error('DB delete error:', dbError);
+            alert('Erreur lors de la suppression des métadonnées : ' + dbError.message);
+            return;
+          }
+          
+          // Supprimer du storage
+          const { error: storageError } = await supabaseClient.storage.from('documents').remove([filename]);
+          if (storageError) {
+            console.error('Storage delete error:', storageError);
+            // Continuer quand même car les métadonnées sont déjà supprimées
+          }
+          
+          loadDocuments();
+          loadStats();
+        } catch (error) {
+          console.error('Delete error:', error);
+          alert('Erreur lors de la suppression : ' + error.message);
+        }
       }
     }
 
