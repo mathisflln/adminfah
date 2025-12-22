@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin – Nouvel article</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <link href="https://fonts.googleapis.com/css2?family=Stack+Sans+Headline:wght@200..700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: "Stack Sans Headline", sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 40px;
+    }
+
+    h1 {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      margin-top: 16px;
+      margin-bottom: 6px;
+    }
+
+    input, textarea {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-family: inherit;
+      font-size: 0.95rem;
+    }
+
+    textarea {
+      min-height: 260px;
+      resize: vertical;
+    }
+
+    .actions {
+      margin-top: 24px;
+    }
+
+    .btn {
+      padding: 12px 18px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      margin-right: 12px;
+    }
+
+    .btn-primary {
+      background: #111;
+      color: #fff;
+    }
+
+    .btn-secondary {
+      background: #ddd;
+    }
+
+    .error {
+      color: #c00;
+      margin-top: 12px;
+    }
+  </style>
+</head>
+
+<body>
+
+  <h1>Nouvel article</h1>
+
+  <label for="title">Titre</label>
+  <input type="text" id="title" placeholder="Titre de l’article" />
+
+  <label for="slug">Slug (URL)</label>
+  <input type="text" id="slug" placeholder="mon-article" />
+
+  <label for="content">Contenu (Markdown)</label>
+  <textarea id="content" placeholder="# Mon article"></textarea>
+
+  <div class="actions">
+    <button class="btn btn-primary" onclick="saveArticle(true)">Publier</button>
+    <button class="btn btn-secondary" onclick="saveArticle(false)">Sauvegarder brouillon</button>
+    <button class="btn btn-secondary" onclick="goBack()">Annuler</button>
+  </div>
+
+  <div class="error" id="error"></div>
+
+  <script>
+    const SUPABASE_URL = "https://ckfdysasgawyixbxjyfz.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZmR5c2FzZ2F3eWl4YnhqeWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5ODg1NjcsImV4cCI6MjA3NzU2NDU2N30.t0ubaRk5sz7kewyEsOg4CpFvj47S9U1J1SP_3DQBmE8";
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkAdmin() {
+      const { data: userData } = await supabaseClient.auth.getUser();
+      if (!userData.user) {
+        window.location.href = "/login.html";
+        return;
+      }
+
+      const { data: profile } = await supabaseClient
+        .from("profiles")
+        .select("role")
+        .eq("id", userData.user.id)
+        .single();
+
+      if (!profile || profile.role !== "admin") {
+        window.location.href = "https://fahmariecurie.vercel.app";
+      }
+    }
+
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-");
+    }
+
+    document.getElementById("title").addEventListener("input", e => {
+      document.getElementById("slug").value = slugify(e.target.value);
+    });
+
+    async function saveArticle(publish) {
+      const title = document.getElementById("title").value.trim();
+      const slug = document.getElementById("slug").value.trim();
+      const content = document.getElementById("content").value.trim();
+      const errorDiv = document.getElementById("error");
+
+      errorDiv.textContent = "";
+
+      if (!title || !slug || !content) {
+        errorDiv.textContent = "Tous les champs sont obligatoires";
+        return;
+      }
+
+      const { data: userData } = await supabaseClient.auth.getUser();
+
+      const { error } = await supabaseClient.from("articles").insert({
+        title,
+        slug,
+        content,
+        published: publish,
+        author_id: userData.user.id
+      });
+
+      if (error) {
+        errorDiv.textContent = "Erreur lors de l'enregistrement";
+        return;
+      }
+
+      window.location.href = "articles.html";
+    }
+
+    function goBack() {
+      window.location.href = "articles.html";
+    }
+
+    checkAdmin();
+  </script>
+
+</body>
+</html>
