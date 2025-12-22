@@ -99,17 +99,17 @@
   <script>
     const SUPABASE_URL = "https://ckfdysasgawyixbxjyfz.supabase.co";
     const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNrZmR5c2FzZ2F3eWl4YnhqeWZ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE5ODg1NjcsImV4cCI6MjA3NzU2NDU2N30.t0ubaRk5sz7kewyEsOg4CpFvj47S9U1J1SP_3DQBmE8";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     async function checkAdminAccess() {
-      const { data: userData } = await supabase.auth.getUser();
+      const { data: userData } = await supabaseClient.auth.getUser();
 
       if (!userData.user) {
         window.location.href = "/login.html";
         return;
       }
 
-      const { data: profile, error } = await supabase
+      const { data: profile, error } = await supabaseClient
         .from("profiles")
         .select("role")
         .eq("id", userData.user.id)
@@ -126,7 +126,7 @@
     }
 
     async function logout() {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       window.location.href = "/login.html";
     }
 
