@@ -826,8 +826,8 @@
       }
     }
 
-    // === QUIZ ===
     
+
     let quizQuestions = [];
     
     function renderQuizBuilder() {
@@ -846,11 +846,15 @@
             <input type="text" class="form-input" placeholder="Texte de la question" value="${escapeHtml(q.question)}" data-index="${index}" data-field="question">
           </div>
           <div class="form-group">
+            <label class="form-label" style="margin-bottom: 8px;">Temps limite (secondes)</label>
+            <input type="number" class="form-input" placeholder="20" value="${q.timeLimit || 20}" data-index="${index}" data-field="timeLimit" min="5" max="120">
+          </div>
+          <div class="form-group">
             <label class="form-label" style="margin-bottom: 8px;">Réponses (cochez la bonne réponse)</label>
-            ${q.answers.map((ans, i) => `
+            ${q.options.map((ans, i) => `
               <div class="answer-option">
-                <input type="radio" name="correct-${index}" value="${i}" ${q.correct === i ? 'checked' : ''} data-index="${index}" data-answer="${i}">
-                <input type="text" class="form-input" placeholder="Réponse ${i + 1}" value="${escapeHtml(ans)}" data-index="${index}" data-field="answer" data-answer="${i}">
+                <input type="radio" name="correctIndex-${index}" value="${i}" ${q.correctIndex === i ? 'checked' : ''} data-index="${index}" data-answer="${i}">
+                <input type="text" class="form-input" placeholder="Réponse ${i + 1}" value="${escapeHtml(ans)}" data-index="${index}" data-field="option" data-answer="${i}">
               </div>
             `).join('')}
           </div>
@@ -866,11 +870,18 @@
         });
       });
       
-      container.querySelectorAll('input[data-field="answer"]').forEach(input => {
+      container.querySelectorAll('input[data-field="timeLimit"]').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const idx = parseInt(e.target.dataset.index);
+          quizQuestions[idx].timeLimit = parseInt(e.target.value) || 20;
+        });
+      });
+      
+      container.querySelectorAll('input[data-field="option"]').forEach(input => {
         input.addEventListener('input', (e) => {
           const idx = parseInt(e.target.dataset.index);
           const ansIdx = parseInt(e.target.dataset.answer);
-          quizQuestions[idx].answers[ansIdx] = e.target.value;
+          quizQuestions[idx].options[ansIdx] = e.target.value;
         });
       });
       
@@ -878,7 +889,7 @@
         radio.addEventListener('change', (e) => {
           const idx = parseInt(e.target.dataset.index);
           const ansIdx = parseInt(e.target.dataset.answer);
-          quizQuestions[idx].correct = ansIdx;
+          quizQuestions[idx].correctIndex = ansIdx;
         });
       });
       
@@ -894,8 +905,9 @@
     document.getElementById('btn-add-quiz-question').addEventListener('click', () => {
       quizQuestions.push({
         question: '',
-        answers: ['', '', '', ''],
-        correct: 0
+        options: ['', '', '', ''],
+        correctIndex: 0,
+        timeLimit: 20
       });
       renderQuizBuilder();
     });
