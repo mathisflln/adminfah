@@ -133,8 +133,8 @@
   <!-- SIDEBAR -->
   <aside class="sidebar">
     <div class="sidebar-header">
-      <a href="https://fahmariecurie.vercel.app" class="sidebar-logo">
-        <img src="https://fahmariecurie.vercel.app/assets/logos/fah.png" alt="FAH Marie-Curie" />
+      <a href="index.html" class="sidebar-logo">
+        <img src="assets/logos/fah.png" alt="FAH Marie-Curie" />
       </a>
       <span class="admin-badge">ADMIN</span>
     </div>
@@ -161,6 +161,18 @@
         <div class="nav-item" data-view="events">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
           <span>Événements</span>
+        </div>
+      </div>
+      
+      <div class="nav-section">
+        <div class="nav-section-title">Communication</div>
+        <div class="nav-item" data-view="emails">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+          <span>Emails</span>
+        </div>
+        <div class="nav-item" data-view="invites">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="8.5" cy="7" r="4"></circle><line x1="20" y1="8" x2="20" y2="14"></line><line x1="23" y1="11" x2="17" y2="11"></line></svg>
+          <span>Inviter des membres</span>
         </div>
       </div>
     </nav>
@@ -244,6 +256,10 @@
             <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">📅 Nouvel événement</div>
             <div style="font-size: 0.85rem; color: #999;">Créer un événement</div>
           </div>
+          <div class="stat-card" style="cursor: pointer;" data-view="emails">
+            <div style="font-size: 1.1rem; font-weight: 600; margin-bottom: 8px;">📧 Envoyer un email</div>
+            <div style="font-size: 0.85rem; color: #999;">Email groupé aux membres</div>
+          </div>
         </div>
       </div>
     </div>
@@ -317,6 +333,86 @@
           </button>
         </div>
         <div id="events-list"></div>
+      </div>
+    </div>
+
+    <!-- VUE EMAILS -->
+    <div id="view-emails" class="view-section">
+      <div class="page-header">
+        <h1 class="page-title">Envoyer un email</h1>
+        <p class="page-subtitle">Envoyez des emails à tous les membres inscrits</p>
+      </div>
+      <div class="content-section">
+        <form id="email-form">
+          <div class="form-group">
+            <label class="form-label">Objet de l'email *</label>
+            <input type="text" class="form-input" id="email-subject" required placeholder="Ex: Information importante">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Contenu de l'email *</label>
+            <div class="rich-editor">
+              <div class="editor-toolbar">
+                <button type="button" class="editor-btn" data-command="bold" data-target="email"><strong>Gras</strong></button>
+                <button type="button" class="editor-btn" data-command="italic" data-target="email"><em>Italique</em></button>
+                <button type="button" class="editor-btn" data-command="underline" data-target="email"><u>Souligné</u></button>
+                <button type="button" class="editor-btn" data-command="insertUnorderedList" data-target="email">• Liste</button>
+                <button type="button" class="editor-btn" data-command="formatBlock" data-value="h2" data-target="email">Titre 2</button>
+                <button type="button" class="editor-btn" data-command="formatBlock" data-value="h3" data-target="email">Titre 3</button>
+                <button type="button" class="editor-btn" data-command="createLink" data-target="email">🔗 Lien</button>
+              </div>
+              <div class="editor-content" id="email-content" contenteditable="true"></div>
+            </div>
+            <p style="font-size: 0.85rem; color: #999; margin-top: 8px;">
+              💡 Astuce : Le contenu sera automatiquement mis en page avec le design FAH Marie-Curie
+            </p>
+          </div>
+
+          <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <div style="font-size: 0.9rem; font-weight: 500; color: #e5e5e5; margin-bottom: 8px;">📊 Destinataires</div>
+            <div style="font-size: 0.85rem; color: #999;">
+              L'email sera envoyé à <strong id="users-count" style="color: #FFFF10;">—</strong> membres inscrits
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn-modal btn-primary" style="flex: none; padding: 14px 32px;">
+              📧 Envoyer à tous les membres
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- VUE INVITES -->
+    <div id="view-invites" class="view-section">
+      <div class="page-header">
+        <h1 class="page-title">Inviter des membres</h1>
+        <p class="page-subtitle">Envoyez des invitations par email</p>
+      </div>
+      <div class="content-section">
+        <form id="invite-form">
+          <div class="form-group">
+            <label class="form-label">Adresses email *</label>
+            <textarea class="form-textarea" id="invite-emails" placeholder="email1@exemple.com&#10;email2@exemple.com&#10;email3@exemple.com" style="min-height: 200px;" required></textarea>
+            <p style="font-size: 0.85rem; color: #999; margin-top: 8px;">
+              💡 Entrez une adresse email par ligne
+            </p>
+          </div>
+
+          <div style="background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 8px; padding: 16px; margin-bottom: 24px;">
+            <div style="font-size: 0.9rem; font-weight: 500; color: #e5e5e5; margin-bottom: 8px;">📨 Fonctionnement</div>
+            <div style="font-size: 0.85rem; color: #999; line-height: 1.6;">
+              Les personnes recevront un email d'invitation Supabase pour créer leur compte et rejoindre la plateforme FAH Marie-Curie.
+            </div>
+          </div>
+
+          <div class="modal-actions">
+            <button type="submit" class="btn-modal btn-primary" style="flex: none; padding: 14px 32px;">
+              📤 Envoyer les invitations
+            </button>
+          </div>
+        </form>
       </div>
     </div>
   </main>
@@ -514,6 +610,7 @@
       if (viewName === 'quiz') loadQuizzes();
       if (viewName === 'documents') loadDocuments();
       if (viewName === 'events') loadEvents();
+      if (viewName === 'emails') loadUsersCount();
     }
 
     document.querySelectorAll('.nav-item').forEach(item => {
@@ -600,6 +697,10 @@
         e.preventDefault();
         const command = btn.dataset.command;
         const value = btn.dataset.value;
+        const target = btn.dataset.target;
+        
+        // Déterminer quel éditeur utiliser
+        const editorId = target === 'email' ? 'email-content' : 'article-content';
         
         if (command === 'createLink') {
           const url = prompt('URL du lien:');
@@ -610,7 +711,7 @@
           document.execCommand(command, false, null);
         }
         
-        document.getElementById('article-content').focus();
+        document.getElementById(editorId).focus();
       });
     });
     
